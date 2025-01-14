@@ -13,7 +13,7 @@ from tplinkrouterc6u.common.dataclass import (Device, Firmware, IPv4DHCPLease,
 from tplinkrouterc6u.common.exception import ClientException
 from tplinkrouterc6u.common.helper import get_ip, get_mac
 from tplinkrouterc6u.common.package_enum import Connection
-
+from tplinkrouterc6u.common.encryption import EncodeHelper
 
 class TPLinkXDRClient(AbstractRouter):
     _stok = ''
@@ -31,7 +31,7 @@ class TPLinkXDRClient(AbstractRouter):
         response = self._session.post(self.host, json={
             'method': 'do',
             'login': {
-                'password': self._encode_password(self.password),
+                'password': EncodeHelper.encode_password(self.password),
             }
         }, timeout=self.timeout, verify=self._verify_ssl)
         try:
@@ -233,31 +233,4 @@ class TPLinkXDRClient(AbstractRouter):
         response = self._session.post(url, json=payload, timeout=self.timeout, verify=self._verify_ssl)
         return response.json()
 
-    @staticmethod
-    def _encode_password(pwd: str) -> str:
-        return TPLinkXDRClient._security_encode(
-            pwd,
-            'RDpbLfCPsJZ7fiv',
-            ('yLwVl0zKqws7LgKPRQ84Mdt708T1qQ3Ha7xv3H7NyU84p21BriUWBU43odz3iP4rBL3cD'
-                '02KZciXTysVXiV8ngg6vL48rPJyAUw0HurW20xqxv9aYb4M9wK1Ae0wlro510qXeU07kV57fQMc8L6aLg'
-                'MLwygtc0F10a0Dg70TOoouyFhdysuRMO51yY5ZlOZZLEal1h0t9YQW0Ko7oBwmCAHoic4HYbUyVeU3sfQ'
-                '1xtXcPcf1aT303wAQhv66qzW'),
-        )
 
-    @staticmethod
-    def _security_encode(data1: str, data2: str, char_dict: str) -> str:
-        data1_len = len(data1)
-        data2_len = len(data2)
-        dict_len = len(char_dict)
-        res = ''
-        for c in range(max(data1_len, data2_len)):
-            a = b = 187
-            if c >= data1_len:
-                a = ord(data2[c])
-            elif c >= data2_len:
-                b = ord(data1[c])
-            else:
-                b = ord(data1[c])
-                a = ord(data2[c])
-            res += char_dict[(b ^ a) % dict_len]
-        return res
