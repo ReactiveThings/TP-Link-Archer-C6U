@@ -92,6 +92,8 @@ class TplinkC6V4Router(AbstractRouter):
         print(info)
         status = Status()
         status._lan_macaddr = info["mac"]["0"]
+        status.guest_2g_enable = False #todo
+        status.wifi_2g_enable = True #todo
         devices = {}
 
         keys = ["mac","ip","aveRssi","name","txRate","rxRate", "online", "type"]
