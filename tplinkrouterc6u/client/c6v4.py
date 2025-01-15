@@ -83,11 +83,15 @@ class TplinkC6V4Router(AbstractRouter):
         return Firmware(results["hardVer"], results["modelName"] + " " + results["modelVer"], results["softVer"])
 
     def get_status(self) -> Status:
+        info = self.post(2,1,"1|1,0,0", self._id)
+        info = self._parse(info)
+
         results = self.post(2,1,"13|1,0,0", self._id)
         results = self._parse(results)
 
-
+        print(info)
         status = Status()
+        status._lan_macaddr = info["mac"]["0"]
         devices = {}
 
         keys = ["mac","ip","aveRssi","name","txRate","rxRate", "online", "type"]
